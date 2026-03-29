@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NL2SQL Intelligent Agent</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <h1 class="brand-title">Neuro<span>SQL</span></h1>
+            <p class="brand-subtitle">Natural Language Database Explorer</p>
+            
+            <div class="db-upload-zone" id="uploadZone">
+                <input type="file" id="dbFileInput" accept=".db,.sqlite">
+                <span id="uploadLabel">Drag & Drop or Click to Upload .DB</span>
+            </div>
+            <div class="active-db-indicator">
+                <span class="pulse-dot complete"></span> Linked: <strong id="activeDbName" style="color:var(--accent); margin-left:5px;">clinic.db</strong>
+            </div>
+
+            <div class="control-group">
+                <label for="modelSelect">AI Model Selector</label>
+                <div class="select-wrapper">
+                    <select id="modelSelect">
+                        <option value="gemini">Gemini 2.5 Flash</option>
+                        <option value="glm">Z.ai GLM 4.5 Flash</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Operation Mode</label>
+                <div class="mode-toggles">
+                    <button id="modeBatch" class="mode-btn active">Batch Dashboard</button>
+                    <button id="modeCustom" class="mode-btn">Interactive Core</button>
+                </div>
+            </div>
+
+            <div class="control-group" id="rateLimitGroup">
+                <label for="rateLimitSlider">Execution Delay: <span id="rateLimitValue">0</span>s</label>
+                <input type="range" id="rateLimitSlider" min="0" max="60" value="0">
+                <p class="helper-text">Paces automated API hits</p>
+            </div>
+
+            <div class="action-panel">
+                <button id="startBatchBtn" class="primary-btn">Initialize Sequence</button>
+                <button id="haltBtn" class="primary-btn secondary-btn" style="display:none;">Halt Execution</button>
+            </div>
+
+            <!-- Schema Explorer -->
+            <div class="schema-explorer">
+                <h4>Data Explorer <span id="schemaCount"></span></h4>
+                <div id="schemaList" class="schema-list scrollable">
+                    <!-- dynamically populated -->
+                </div>
+            </div>
+
+            <button id="shutdownBtn" class="danger-btn" style="margin-top:auto;">Power Off Server</button>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Batch Dashboard Mode -->
+            <div id="batchView" class="view-panel active">
+                <div class="view-header">
+                    <h2>Automated Evaluation Suite</h2>
+                    <div class="status-indicator">
+                        <span id="batchStatusIndicator" class="pulse-dot idle"></span>
+                        <span id="batchStatusText">System Idle</span>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div id="batchProgress" class="progress-fill"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">0 / 20 Executed</p>
+                </div>
+
+                <div class="results-layout flex-col">
+                    <div class="table-container shadow-box scrollable">
+                        <table id="batchTable" class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Prompt Input</th>
+                                    <th>Operation Status</th>
+                                    <th>Target SQL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchTableBody">
+                                <!-- Results dynamically insert here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="table-container shadow-box latest-data-box scrollable mt-20" style="display: none;" id="latestDataBox">
+                         <h3>Latest Query Output</h3>
+                         <div id="latestDataContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Interactive Chat Mode -->
+            <div id="customView" class="view-panel hidden">
+                <div class="view-header">
+                    <h2>Intelligence Terminal</h2>
+                    <p>Enter natural language to retrieve relational data instantly.</p>
+                </div>
+
+                <div class="chat-layout">
+                    <!-- Dynamic Output -->
+                    <div class="chat-history" id="chatHistory">
+                        <div class="chat-message system">
+                            <div class="bubble">
+                                Ready to query `clinic.db`. Awaiting intelligence orders...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Input Console -->
+                    <div class="quick-prompts">
+                        <span class="prompt-chip" onclick="customPrompt.value='Summarize the data'; sendChatMessage()">Summarize Data</span>
+                        <span class="prompt-chip" onclick="customPrompt.value='List all rows from the primary table'; sendChatMessage()">List All</span>
+                        <span class="prompt-chip" onclick="customPrompt.value='What is the latest entry?'; sendChatMessage()">Latest Entry</span>
+                    </div>
+
+                    <div class="input-console">
+                        <input type="text" id="customPrompt" placeholder="Ask a question (ex. 'How many patients are there?')" autocomplete="off">
+                        <button id="sendCustomBtn" class="primary-btn square">
+                            <svg viewBox="0 0 24 24" width="24" height="24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
